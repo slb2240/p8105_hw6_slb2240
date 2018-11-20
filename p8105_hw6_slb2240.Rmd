@@ -1,0 +1,60 @@
+---
+title: "p8105_hw6_slb2240"
+author: "Samantha Brown"
+date: "11/19/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Problem 1
+
+The Washington Post has gathered data on homicides in 50 large U.S. cities and made the data available through a GitHub repository here.
+
+_Create a city_state variable (e.g. “Baltimore, MD”), and a binary variable indicating whether the homicide is solved. Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake. Modifiy victim_race to have categories white and non-white, with white as the reference category. Be sure that victim_age is numeric._
+
+
+
+```{r, warning = FALSE}
+## Read in and wrangle data
+homicide_data = read.csv("./homicide-data.csv") %>% 
+  mutate(city_state = str_c(city, ", ", state)) %>% 
+  filter(city_state != c("Tulsa, AL", "Dallas, TX", "Phoenix, AZ", "Kansas City, MO")) %>% 
+  mutate(homicide_solved = as.numeric(disposition == "Closed by arrest"),
+         ## Is this fct_relevel() right?
+         victim_race = fct_relevel(victim_race, "White"),
+         victim_age = as.numeric(victim_age))
+```
+
+
+
+_For the city of Baltimore, MD, use the glm function to fit a logistic regression with resolved vs unresolved as the outcome and victim age, sex and race (as just defined) as predictors. Save the output of glm as an R object; apply the broom::tidy to this object; and obtain the estimate and confidence interval of the adjusted odds ratio for solving homicides comparing black victims to white victims keeping all other variables fixed._
+
+
+
+```{r}
+## Filter data to look at Baltimore, MD only
+baltimore_data = homicide_data %>% 
+  filter(city_state == "Baltimore, MD")
+
+## Fit logistic regression
+baltimore_glm = baltimore_data %>% 
+  glm(homicide_solved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
+
+## Obtain estimate and confidence interval
+baltimore_glm %>% 
+  broom::tidy() %>% 
+  mutate(OR = exp(estimate)) %>%
+  select(term, log_OR = estimate, OR, p.value) %>% 
+  knitr::kable(digits = 3)
+```
+
+## How do you obtain the confidence interval?
+
+
+The reported p-value for blacks in Baltimore is significant, indicating that homicides involving black victims in Baltimore are highly associated with going unsolved compared to white victims in Baltimore. The effects for homicides involving other races in Baltimore are not signficant, as indicated by their large p-values.
+
+The sample sizes for Asians, Hispanics, and victims of "Other" races in Baltimore are `r baltimore_data %>% filter(victim_race == "Asian") %>% nrow()`, `r baltimore_data %>% filter(victim_race == "Hispanic") %>% nrow()`, `r baltimore_data %>% filter(victim_race == "Other") %>% nrow()`, respectively. In contrast, there are `r baltimore_data %>% filter(victim_race == "Black") %>% nrow()` reported homicide victims in Baltimore. Therefore, it is possible that the insignificant effects for homicides involving victims other than blacks are results of their small sample sizes.
