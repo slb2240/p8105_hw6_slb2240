@@ -46,15 +46,15 @@ baltimore_glm = baltimore_data %>%
   glm(homicide_solved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
 
 ## Obtain estimate and confidence interval
+## For the confidence interval, do I need to do exp(1.96*std.error)? Or without exp()? Not sure if this is right
 baltimore_glm %>% 
   broom::tidy() %>% 
-  mutate(OR = exp(estimate)) %>%
-  select(term, log_OR = estimate, OR, p.value) %>% 
+  mutate(OR = exp(estimate),
+         OR_upper_bound = exp(estimate) + 1.96*std.error,
+         OR_lower_bound = exp(estimate) - 1.96*std.error) %>%
+  select(term, log_OR = estimate, OR, OR_lower_bound, OR_upper_bound, p.value) %>% 
   knitr::kable(digits = 3)
 ```
-
-## How do you obtain the confidence interval?
-
 
 The reported p-value for blacks in Baltimore is significant, indicating that homicides involving black victims in Baltimore are highly associated with going unsolved compared to white victims in Baltimore. The effects for homicides involving other races in Baltimore are not signficant, as indicated by their large p-values.
 
