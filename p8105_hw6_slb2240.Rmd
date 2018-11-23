@@ -61,7 +61,7 @@ baltimore_glm %>%
 ```
 
 
-I am 95% confident that the true odds ratio for homicides compating non-white victims to white victims is between 0.321 and 0.63, keeping all other variables fixed.
+I am 95% confident that the true odds ratio for homicides comparing non-white victims to white victims is between 0.321 and 0.63, keeping all other variables fixed.
 
 
 _Now run glm for each of the cities in your dataset, and extract the adjusted odds ratio (and CI) for solving homicides comparing black victims to white victims. Do this within a “tidy” pipeline, making use of purrr::map, list columns, and unnest as necessary to create a dataframe with estimated ORs and CIs for each city._
@@ -98,24 +98,29 @@ homicide_data %>%
   
 ```
 
+## Finish commenting
 
-
+In the plot above, I calculated the odds ratio and confidence intervals for each city in the dataset. This odds ratio meausres the strength of the assiciation for homicides comparing nonwhite victims to white victims. The plot indicates Boston, MA had the lowest odds ratio, while Tampa, FL had the highest odds ratio.
 
 ## Problem 2
+
+_Load and clean the data for regression analysis_ 
 
 ```{r}
 birthweight_data = read.csv("./birthweight.csv") %>% 
   janitor::clean_names() %>% 
-  mutate(babysex = as.factor(babysex),
+  mutate(babysex = as.factor(ifelse(babysex == 1, "male", "female")),
          frace = as.factor(frace),
+         frace = recode_factor(frace, "1" = "white", "2" = "black", "3" = "asian", "4" = "puerto rican", "8" = "other", "9" = "unknown"),
          malform = as.logical(malform),
-         mrace = as.factor(mrace)) %>% 
-  select(-pnumlbw, -pnumsga)
+         mrace = as.factor(mrace),
+         mrace = recode_factor(mrace, "1" = "white", "2" = "black", "3" = "asian", "4" = "puerto rican", "8" = "other"))
 ```
 
 
 
 ```{r, include = FALSE}
+## Check data classes
 class(birthweight_data$babysex)
 class(birthweight_data$bhead)
 class(birthweight_data$blength)
@@ -138,3 +143,21 @@ class(birthweight_data$smoken)
 class(birthweight_data$wtgain)
 ```
 
+_Propose a regression model for birthweight. This model may be based on a hypothesized structure for the factors that underly birthweight, on a data-driven model-building process, or a combination of the two. Describe your modeling process and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot._
+
+
+```{r}
+
+```
+
+Compare your model to two others:
+
+* One using length at birth and gestational age as predictors (main effects only)
+* One using head circumference, length, sex, and all interactions (including the three-way interaction) between these
+
+```{r}
+
+```
+
+
+Make this comparison in terms of the cross-validated prediction error; use crossv_mc and functions in purrr as appropriate
