@@ -146,7 +146,7 @@ class(birthweight_data$wtgain)
 _Propose a regression model for birthweight. This model may be based on a hypothesized structure for the factors that underly birthweight, on a data-driven model-building process, or a combination of the two. Describe your modeling process and show a plot of model residuals against fitted values – use add_predictions and add_residuals in making this plot._
 
 
-```{r}
+```{r, include = FALSE}
 ## First, fit a regression using all predictors
 mult.fit = lm(bwt ~ ., data = birthweight_data)
 summary(mult.fit)
