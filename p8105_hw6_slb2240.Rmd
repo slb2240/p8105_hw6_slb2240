@@ -204,4 +204,31 @@ model_interactions = lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*
 summary(model_interactions)
 ```
 
-Make this comparison in terms of the cross-validated prediction error; use crossv_mc and functions in purrr as appropriate
+_Make this comparison in terms of the cross-validated prediction error; use crossv_mc and functions in purrr as appropriate_
+
+```{r}
+cv_df = 
+  crossv_mc(birthweight_data, 1000) %>% 
+  ## Create training and testing groups
+  mutate(train = map(train, as_tibble), 
+         test = map(test, as_tibble)) %>% 
+  ## Apply training groups for the three models
+  mutate(stepwise = map(train, ~lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = birthweight_data)),
+         length_gaweeks = map(train, ~lm(bwt ~ blength + gaweeks, data = birthweight_data)),
+         interactions = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex + blength*babysex + bhead*blength*babysex, data = birthweight_data))) %>% 
+  ## Map testing data
+  mutate(rmse_stepwise_reg = map2_dbl(stepwise, test, ~rmse(model = .x, data = .y)),
+         rmse_model_length_gaweeks = map2_dbl(length_gaweeks, test, ~rmse(model = .x, data = .y)),
+         rmse_model_interactions = map2_dbl(interactions, test, ~rmse(model = .x, data = .y)))
+
+
+## Create plot
+cv_df %>% 
+  select(starts_with("rmse")) %>% 
+  gather(key = model, value = rmse) %>% 
+  mutate(model = str_replace(model, "rmse_", ""),
+         model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin()
+```
+
