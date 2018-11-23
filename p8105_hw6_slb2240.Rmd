@@ -79,9 +79,13 @@ homicide_data %>%
   unnest() %>% 
   filter(term == "victim_racenonwhite") %>% 
   mutate(OR = exp(estimate),
-         ## Is this right? Or should I take exp(conf.low)?
-         lower_bound = conf.low,
-         upper_bound = conf.high)
+         lower_bound = exp(conf.low),
+         upper_bound = exp(conf.high)) %>% 
+  select(city_state, OR, lower_bound, upper_bound) %>% 
+  ggplot(aes(x = city_state, y = OR)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound)) +
+  coord_flip()
   
 ```
 
