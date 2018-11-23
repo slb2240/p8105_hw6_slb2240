@@ -147,8 +147,25 @@ _Propose a regression model for birthweight. This model may be based on a hypoth
 
 
 ```{r}
+## First, fit a regression using all predictors
+mult.fit = lm(bwt ~ ., data = birthweight_data)
+summary(mult.fit)
 
+## Stepwise elimination (from Methods I, lecture 18)
+step(mult.fit, direction = "backward")
 ```
+
+I performed a stepwise regression on the `birthweight_data`. The `step` function developed several regression models by adding and eliminating different predictors one at a time, and ultimately identifying the best model. My model includes `babysex`, `bhead`, `blength`, `delwt`, `fincome`, `gaweeks`, `mheight`, `mrace`, `parity`, `ppwt`, and `smoken` as signficant predictors of the baby's weight. My model is summarized in the code chunk below:
+
+```{r}
+stepwise_reg = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = birthweight_data) %>%
+  summary() %>% 
+  broom::tidy() %>% 
+  knitr::kable(digits = 4)
+
+stepwise_reg
+```
+
 
 Compare your model to two others:
 
