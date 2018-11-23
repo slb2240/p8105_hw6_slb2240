@@ -160,6 +160,7 @@ I performed a stepwise regression on the `birthweight_data`. I used the `step` f
 ```{r}
 stepwise_reg = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = birthweight_data)
 
+## Tidied output of stepwise_reg
 stepwise_reg %>%
   summary() %>% 
   broom::tidy() %>% 
@@ -169,6 +170,8 @@ stepwise_reg %>%
 ```{r}
 ## Use modelr package for add_predictions() and add_residuals()
 library(modelr)
+
+## Calcluate predicted and residual values
 predictors_and_residuals = birthweight_data %>% 
   add_predictions(stepwise_reg) %>% 
   add_residuals(stepwise_reg)
@@ -178,7 +181,7 @@ ggplot(predictors_and_residuals, aes(x = pred, y = resid)) +
   labs(
     x = "Predicted Value",
     y = "Residual Value",
-    title = "Predicted vs. Residual values for stepwise_reg"
+    title = "Residuals vs. Predicted values for stepwise_reg"
   )
 ```
 
@@ -189,8 +192,16 @@ Compare your model to two others:
 * One using head circumference, length, sex, and all interactions (including the three-way interaction) between these
 
 ```{r}
-
+## Model using length at birth and gestational age as predictors (main effects only)
+model_length_gaweeks = lm(bwt ~ blength + gaweeks, data = birthweight_data)
+summary(model_length_gaweeks)
 ```
 
+
+```{r}
+## Model using head circumference, length, sex, and all interactions (including the three-way interaction) between these
+model_interactions = lm(bwt ~ bhead + blength + babysex + bhead*blength + bhead*babysex + blength*babysex + bhead*blength*babysex, data = birthweight_data)
+summary(model_interactions)
+```
 
 Make this comparison in terms of the cross-validated prediction error; use crossv_mc and functions in purrr as appropriate
