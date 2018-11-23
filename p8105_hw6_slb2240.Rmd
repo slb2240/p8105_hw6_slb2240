@@ -155,15 +155,31 @@ summary(mult.fit)
 step(mult.fit, direction = "backward")
 ```
 
-I performed a stepwise regression on the `birthweight_data`. The `step` function developed several regression models by adding and eliminating different predictors one at a time, and ultimately identifying the best model. My model includes `babysex`, `bhead`, `blength`, `delwt`, `fincome`, `gaweeks`, `mheight`, `mrace`, `parity`, `ppwt`, and `smoken` as signficant predictors of the baby's weight. My model is summarized in the code chunk below:
+I performed a stepwise regression on the `birthweight_data`. I used the `step` function to develop several regression models by adding and eliminating different predictors one at a time, and ultimately identifying the best model. My model includes `babysex`, `bhead`, `blength`, `delwt`, `fincome`, `gaweeks`, `mheight`, `mrace`, `parity`, `ppwt`, and `smoken` as signficant predictors of the baby's weight. My model is summarized in the code chunk below:
 
 ```{r}
-stepwise_reg = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = birthweight_data) %>%
+stepwise_reg = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + mheight + mrace + parity + ppwt + smoken, data = birthweight_data)
+
+stepwise_reg %>%
   summary() %>% 
   broom::tidy() %>% 
   knitr::kable(digits = 4)
+```
 
-stepwise_reg
+```{r}
+## Use modelr package for add_predictions() and add_residuals()
+library(modelr)
+predictors_and_residuals = birthweight_data %>% 
+  add_predictions(stepwise_reg) %>% 
+  add_residuals(stepwise_reg)
+
+ggplot(predictors_and_residuals, aes(x = pred, y = resid)) +
+  geom_point(alpha = .5, col = "blue") + 
+  labs(
+    x = "Predicted Value",
+    y = "Residual Value",
+    title = "Predicted vs. Residual values for stepwise_reg"
+  )
 ```
 
 
